@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CoWorkHub</title>
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+
+<!-- ===================== LOGIN ===================== -->
+<section id="login-view" class="login-wrap">
+  <form id="login-form" class="card login-card">
+    <h1 class="brand">Co<span>Work</span>Hub</h1>
+    <p class="muted">Gestión de la red de coworking</p>
+    <label>Usuario <input name="usuario" required autocomplete="username" placeholder="admin"></label>
+    <label>Contraseña <input name="contrasena" type="password" required autocomplete="current-password" placeholder="••••••"></label>
+    <button class="btn primary" type="submit">Iniciar sesión</button>
+    <details class="hint">
+      <summary>Usuarios de prueba</summary>
+      <ul>
+        <li><code>admin / Admin123</code> (ADMIN)</li>
+        <li><code>recepcion / Recep123</code> (RECEPTIONIST)</li>
+        <li><code>ana / Ana12345</code> (MEMBER)</li>
+        <li><code>luis / Luis12345</code> (MEMBER)</li>
+      </ul>
+    </details>
+  </form>
+</section>
+
+<!-- ===================== APP ===================== -->
+<section id="app-view" class="hidden">
+  <header class="topbar">
+    <div class="brand small">Co<span>Work</span>Hub</div>
+    <nav id="nav"></nav>
+    <div class="user">
+      <span id="user-label"></span>
+      <button id="logout" class="btn ghost">Salir</button>
+    </div>
+  </header>
+
+  <main id="main">
+    <!-- Inicio -->
+    <section data-view="inicio" class="view">
+      <h2>Inicio</h2>
+      <div class="grid cards" id="home-cards"></div>
+      <div id="home-consumo"></div>
+    </section>
+
+    <!-- Disponibilidad -->
+    <section data-view="disponibilidad" class="view">
+      <h2>Salas disponibles</h2>
+      <form id="availability-form" class="card filters">
+        <label>Sede <select name="sedeId" required></select></label>
+        <label>Fecha <input type="date" name="fecha" required></label>
+        <label>Desde <input type="time" name="horaInicio" step="1800" required value="09:00"></label>
+        <label>Hasta <input type="time" name="horaFin" step="1800" required value="11:00"></label>
+        <label>Capacidad mín. <input type="number" name="capacidadMinima" min="1" placeholder="opcional"></label>
+        <fieldset class="checks" id="availability-equipment"><legend>Equipamiento</legend></fieldset>
+        <button class="btn primary">Buscar</button>
+      </form>
+      <div id="availability-result"></div>
+    </section>
+
+    <!-- Reservas -->
+    <section data-view="reservas" class="view">
+      <h2>Reservas</h2>
+      <div class="split">
+        <form id="booking-form" class="card">
+          <h3>Nueva reserva</h3>
+          <label>Miembro <select name="miembroId" required></select></label>
+          <label>Sala <select name="salaId" required></select></label>
+          <label>Fecha <input type="date" name="fecha" required></label>
+          <div class="row">
+            <label>Inicio <input type="time" name="horaInicio" step="1800" required value="09:00"></label>
+            <label>Fin <input type="time" name="horaFin" step="1800" required value="10:00"></label>
+          </div>
+          <label>Asistentes <input type="number" name="asistentes" min="1" value="1" required></label>
+          <fieldset class="checks" id="booking-services"><legend>Servicios adicionales (cantidad)</legend></fieldset>
+          <button class="btn primary">Reservar</button>
+        </form>
+        <div class="card grow">
+          <form id="booking-filter" class="filters inline">
+            <label>Miembro <select name="miembroId"><option value="">—</option></select></label>
+            <label>Sala <select name="salaId"><option value="">—</option></select></label>
+            <label>Fecha <input type="date" name="fecha"></label>
+            <label>Estado
+              <select name="estado">
+                <option value="">—</option><option>PENDING</option><option>CONFIRMED</option>
+                <option>COMPLETED</option><option>CANCELLED</option>
+              </select>
+            </label>
+            <button class="btn">Filtrar</button>
+          </form>
+          <div id="booking-list"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Miembros -->
+    <section data-view="miembros" class="view">
+      <h2>Miembros</h2>
+      <div class="split">
+        <form id="member-form" class="card">
+          <h3 id="member-form-title">Registrar miembro</h3>
+          <input type="hidden" name="id">
+          <label>Documento <input name="documento" required></label>
+          <label>Nombre completo <input name="nombreCompleto" required></label>
+          <label>Email <input type="email" name="email" required></label>
+          <label>Plan <select name="planId" required></select></label>
+          <div class="only-create">
+            <label>Usuario <input name="usuario" required></label>
+            <label>Contraseña <input type="password" name="contrasena" required minlength="6"></label>
+          </div>
+          <div class="row">
+            <button class="btn primary">Guardar</button>
+            <button type="button" class="btn ghost" id="member-form-reset">Limpiar</button>
+          </div>
+        </form>
+        <div class="card grow">
+          <form id="member-filter" class="filters inline">
+            <label>Nombre <input name="nombre" placeholder="contiene..."></label>
+            <label>Estado <select name="estado"><option value="">—</option><option>ACTIVE</option><option>SUSPENDED</option></select></label>
+            <button class="btn">Filtrar</button>
+          </form>
+          <div id="member-list"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Catálogos -->
+    <section data-view="catalogos" class="view">
+      <h2>Catálogos</h2>
+      <div class="tabs" id="catalog-tabs"></div>
+      <div class="split">
+        <form id="catalog-form" class="card"></form>
+        <div class="card grow" id="catalog-list"></div>
+      </div>
+    </section>
+  </main>
+</section>
+
+<dialog id="modal">
+  <div class="modal-head">
+    <h3 id="modal-title"></h3>
+    <button class="btn ghost" id="modal-close" aria-label="Cerrar">✕</button>
+  </div>
+  <div id="modal-body"></div>
+</dialog>
+
+<div id="toasts"></div>
+
+<script src="js/config.js"></script>
+<script src="js/api.js"></script>
+<script src="js/app.js"></script>
+</body>
+</html>
