@@ -1,0 +1,15 @@
+# Maven / build
+backend/target/
+!backend/.mvn/wrapper/maven-wrapper.jar
+# IDE
+.idea/
+*.iml
+.vscode/
+.settings/
+.project
+.classpath
+# SO
+.DS_Store
+Thumbs.db
+# Node (newman)
+node_modules/
