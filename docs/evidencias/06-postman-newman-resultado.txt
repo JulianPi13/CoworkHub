@@ -1,0 +1,212 @@
+﻿newman
+
+CoWorkHub - Escenarios de aceptación
+
+Folder 0 · Preparación
+Sub-folder Health (público)
+  GET http://localhost:8080/actuator/health [200 OK, 500B, 70ms]
+  Pass  Status 200
+  Pass  UP
+
+Sub-folder Login ADMIN
+  POST http://localhost:8080/auth/login [200 OK, 709B, 929ms]
+  Pass  Status 200
+
+Sub-folder Login RECEPTIONIST
+  POST http://localhost:8080/auth/login [200 OK, 735B, 141ms]
+  Pass  Status 200
+
+Sub-folder Login MEMBER (ana)
+  POST http://localhost:8080/auth/login [200 OK, 723B, 152ms]
+  Pass  Status 200
+  Pass  miembroId = 1
+
+Sub-folder Perfil (RF-14)
+  GET http://localhost:8080/auth/perfil [200 OK, 461B, 70ms]
+  Pass  Status 200
+  Pass  rol MEMBER
+
+Folder 1 · Escenarios de aceptación (14)
+Sub-folder 01 · Reservar una sala libre con 2 servicios → 201
+  POST http://localhost:8080/api/reservas [201 Created, 1.02kB, 383ms]
+  Pass  Status 201
+  Pass  2 servicios
+  Pass  costo calculado
+
+Sub-folder 02 · Reservar en un horario que se cruza → 409 RN-01
+  POST http://localhost:8080/api/reservas [409 Conflict, 544B, 39ms]
+  Pass  Status 409
+  Pass  codigo = RN-01
+
+Sub-folder 03a · Reservar de 09:00 a 10:00 → 201
+  POST http://localhost:8080/api/reservas [201 Created, 779B, 40ms]
+  Pass  Status 201
+
+Sub-folder 03b · Reservar de 10:00 a 11:00 (termina justo cuando empieza) → 201
+  POST http://localhost:8080/api/reservas [201 Created, 779B, 39ms]
+  Pass  Status 201
+
+Sub-folder 04a · Reservar 45 min → 409 RN-02
+  POST http://localhost:8080/api/reservas [409 Conflict, 595B, 14ms]
+  Pass  Status 409
+  Pass  codigo = RN-02
+
+Sub-folder 04b · Reservar fuera del horario de la sede → 409 RN-03
+  POST http://localhost:8080/api/reservas [409 Conflict, 570B, 22ms]
+  Pass  Status 409
+  Pass  codigo = RN-03
+
+Sub-folder 05a · (prep) Reserva que empieza en más de 30 h
+  POST http://localhost:8080/api/reservas [201 Created, 779B, 39ms]
+  Pass  Status 201
+
+Sub-folder 05b · Cancelar con 30 h o más de anticipación → 200, cargo 0
+  POST http://localhost:8080/api/reservas/19/cancelar [200 OK, 740B, 47ms]
+  Pass  Status 200
+  Pass  CANCELLED
+  Pass  cargo 0
+  Pass  devuelve horas
+
+Sub-folder 06a · (prep) Reserva que empieza en ~5 h
+  POST http://localhost:8080/api/reservas [201 Created, 779B, 35ms]
+  Pass  Status 201
+
+Sub-folder 06b · Cancelar con 5 h de anticipación → 200, cargo 50 %
+  POST http://localhost:8080/api/reservas/20/cancelar [200 OK, 745B, 25ms]
+  Pass  Status 200
+  Pass  cargo = 50 % del costo de la sala
+  Pass  cargo > 0
+
+Sub-folder 07a · (prep) Reserva que empieza en ~1 h 10 min
+  POST http://localhost:8080/api/reservas [201 Created, 779B, 34ms]
+  Pass  Status 201
+
+Sub-folder 07b · Cancelar con 1 h de anticipación → 409 RN-08
+  POST http://localhost:8080/api/reservas/21/cancelar [409 Conflict, 568B, 16ms]
+  Pass  Status 409
+  Pass  codigo = RN-08
+
+Sub-folder 08 · Confirmar una reserva cancelada → 409 RN-09
+  POST http://localhost:8080/api/reservas/19/confirmar [409 Conflict, 557B, 21ms]
+  Pass  Status 409
+  Pass  codigo = RN-09
+
+Sub-folder 09 · Un miembro consulta la reserva de otro → 403
+  GET http://localhost:8080/api/reservas/5 [403 Forbidden, 557B, 20ms]
+  Pass  Status 403
+  Pass  codigo = ACCESO_DENEGADO
+
+Sub-folder 10a · Endpoint protegido sin token → 401
+  GET http://localhost:8080/api/sedes [401 Unauthorized, 594B, 6ms]
+  Pass  Status 401
+  Pass  codigo = NO_AUTENTICADO
+
+Sub-folder 10b · Endpoint protegido con token alterado → 401
+  GET http://localhost:8080/api/sedes [401 Unauthorized, 574B, 5ms]
+  Pass  Status 401
+  Pass  codigo = NO_AUTENTICADO
+
+Sub-folder 11 · Eliminar una sala con reservas futuras → 409 RN-12
+  DELETE http://localhost:8080/api/salas/1 [409 Conflict, 559B, 19ms]
+  Pass  Status 409
+  Pass  codigo = RN-12
+
+Sub-folder 12 · Crear una sede sin nombre → 400
+  POST http://localhost:8080/api/sedes [400 Bad Request, 510B, 64ms]
+  Pass  Status 400
+  Pass  codigo = VALIDACION
+
+Sub-folder 13 · Dos solicitudes simultáneas para la misma sala y horario → una 201 y otra 409
+  GET http://localhost:8080/actuator/health [200 OK, 500B, 18ms]
+  POST http://localhost:8080/api/reservas   POST http://localhost:8080/api/reservas [201 Created, 779B, 37ms]
+[409 Conflict, 544B, 50ms]
+  Pass  una 201 y otra 409: 201, 409
+
+Sub-folder 14 · Listar miembros con ?estado=SUSPENDED → 200 solo suspendidos
+  GET http://localhost:8080/api/miembros?estado=SUSPENDED [200 OK, 591B, 31ms]
+  Pass  Status 200
+  Pass  al menos uno
+  Pass  todos SUSPENDED
+
+Folder 2 · Pruebas adicionales
+Sub-folder Disponibilidad de la sede 2 (RF-03)
+  GET http://localhost:8080/api/disponibilidad?sedeId=2&fecha=2027-07-31&horaInicio=10:00&horaFin=12:00&capacidadMinima=2 [200 OK, 617B, 48ms]
+  Pass  Status 200
+  Pass  la sala de pruebas está ocupada (escenario 1)
+
+Sub-folder Agregar servicio a una reserva PENDING (RF-06)
+  POST http://localhost:8080/api/reservas/16/servicios [200 OK, 1.1kB, 31ms]
+  Pass  Status 200
+  Pass  3 servicios
+
+Sub-folder Quitar servicio de una reserva PENDING (RF-06)
+  DELETE http://localhost:8080/api/reservas/16/servicios/3 [200 OK, 976B, 36ms]
+  Pass  Status 200
+  Pass  2 servicios
+
+Sub-folder Confirmar reserva (RF-07)
+  POST http://localhost:8080/api/reservas/16/confirmar [200 OK, 978B, 22ms]
+  Pass  Status 200
+  Pass  CONFIRMED
+
+Sub-folder Servicios en reserva CONFIRMED → 409 RN-10
+  POST http://localhost:8080/api/reservas/16/servicios [409 Conflict, 600B, 15ms]
+  Pass  Status 409
+  Pass  codigo = RN-10
+
+Sub-folder Completar reserva (RF-09)
+  POST http://localhost:8080/api/reservas/16/completar [200 OK, 978B, 20ms]
+  Pass  Status 200
+  Pass  COMPLETED
+
+Sub-folder Consumo del mes de ana (RF-10)
+  GET http://localhost:8080/api/miembros/1/consumo [200 OK, 556B, 22ms]
+  Pass  Status 200
+  Pass  tiene horas incluidas
+
+Sub-folder Consumo de otro miembro como MEMBER → 403
+  GET http://localhost:8080/api/miembros/2/consumo [403 Forbidden, 554B, 7ms]
+  Pass  Status 403
+
+Sub-folder MEMBER intenta crear una sede → 403
+  POST http://localhost:8080/api/sedes [403 Forbidden, 557B, 7ms]
+  Pass  Status 403
+
+Sub-folder Reservar con miembro suspendido → 409 RN-05
+  POST http://localhost:8080/api/reservas [409 Conflict, 550B, 15ms]
+  Pass  Status 409
+  Pass  codigo = RN-05
+
+Sub-folder Reservar sala inactiva → 409 RN-04
+  POST http://localhost:8080/api/reservas [409 Conflict, 541B, 16ms]
+  Pass  Status 409
+  Pass  codigo = RN-04
+
+Sub-folder Registrar miembro con documento duplicado → 409 RN-11
+  POST http://localhost:8080/api/miembros [409 Conflict, 551B, 44ms]
+  Pass  Status 409
+  Pass  codigo = RN-11
+
+Sub-folder Login con contraseña incorrecta → 401
+  POST http://localhost:8080/auth/login [401 Unauthorized, 557B, 128ms]
+  Pass  Status 401
+
+-------------------------------------------------------------------
+|                         |          executed |            failed |
+--------------------------+-------------------+--------------------
+|              iterations |                 1 |                 0 |
+--------------------------+-------------------+--------------------
+|                requests |                40 |                 0 |
+--------------------------+-------------------+--------------------
+|            test-scripts |                38 |                 0 |
+--------------------------+-------------------+--------------------
+|      prerequest-scripts |                13 |                 0 |
+--------------------------+-------------------+--------------------
+|              assertions |                70 |                 0 |
+-------------------------------------------------------------------
+| total run duration: 5.9s                                        |
+-------------------------------------------------------------------
+| total data received: 9.46kB (approx)                            |
+-------------------------------------------------------------------
+| average response time: 69ms [min: 5ms, max: 929ms, s.d.: 151ms] |
+-------------------------------------------------------------------
