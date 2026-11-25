@@ -14,7 +14,7 @@ El sistema evita reservas duplicadas (también con solicitudes simultáneas), co
 
 | Nombre | Rol |
 |---|---|
-| _(tu nombre aquí)_ | Desarrollo backend y frontend |
+| Oscar Julian Pinto Uribe | Desarrollo backend y frontend |
 
 ## 🧰 Tecnologías
 
